@@ -1,19 +1,22 @@
 package com.fullscreenToggle;
 
+import java.awt.event.KeyEvent;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Keybind;
+import net.runelite.client.config.ModifierlessKeybind;
 
-@ConfigGroup("example")
+@ConfigGroup("fullscreenToggle")
 public interface fullscreenToggleConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+			keyName = "toggleKey",
+			name = "Toggle Fullscreen Key",
+			description = "Hotkey that toggles fullscreen mode"
 	)
-	default String greeting()
+	default Keybind toggleKey()
 	{
-		return "Hello";
+		return new ModifierlessKeybind(KeyEvent.VK_F11, 0);
 	}
 }
