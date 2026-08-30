@@ -1,11 +1,12 @@
-package com.fullscreenToggle;
+package com.fullscreenToggle; // keep your existing package line here
 
 import com.google.inject.Provides;
 import java.awt.Frame;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Window;
 import javax.inject.Inject;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -31,6 +32,7 @@ public class fullscreenTogglePlugin extends Plugin
 
 	private Frame frame;
 	private Rectangle savedBounds;
+	private JMenuBar savedMenuBar;
 	private boolean fullscreen;
 
 	@Provides
@@ -51,6 +53,7 @@ public class fullscreenTogglePlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		hotkeyListener.setEnabledOnLoginScreen(true);
 		keyManager.registerKeyListener(hotkeyListener);
 	}
 
@@ -59,7 +62,6 @@ public class fullscreenTogglePlugin extends Plugin
 	{
 		keyManager.unregisterKeyListener(hotkeyListener);
 
-		// don't leave the client borderless if the plugin is disabled mid-fullscreen
 		if (fullscreen)
 		{
 			toggleFullscreen();
@@ -71,16 +73,19 @@ public class fullscreenTogglePlugin extends Plugin
 		if (frame == null)
 		{
 			Window window = SwingUtilities.getWindowAncestor(client.getCanvas());
-			if (!(window instanceof Frame))
+			if (!(window instanceof JFrame))
 			{
 				return;
 			}
 			frame = (Frame) window;
 		}
 
+		JFrame jFrame = (JFrame) frame;
+
 		if (!fullscreen)
 		{
 			savedBounds = frame.getBounds();
+			savedMenuBar = jFrame.getJMenuBar(); // this is the top grey bar
 
 			Rectangle screenBounds = frame.getGraphicsConfiguration()
 					.getDevice()
@@ -89,6 +94,7 @@ public class fullscreenTogglePlugin extends Plugin
 
 			frame.dispose();
 			frame.setUndecorated(true);
+			jFrame.setJMenuBar(null); // hide it
 			frame.setBounds(screenBounds);
 			frame.setVisible(true);
 
@@ -98,6 +104,7 @@ public class fullscreenTogglePlugin extends Plugin
 		{
 			frame.dispose();
 			frame.setUndecorated(false);
+			jFrame.setJMenuBar(savedMenuBar); // give it back
 			frame.setBounds(savedBounds);
 			frame.setVisible(true);
 
